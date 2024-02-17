@@ -22,13 +22,50 @@ exports.register = asyncHandler(async (req, res, next) => {
     sendTokenResponse(user, 200, res);
 });
 
-//@route    POST api/auth/
-//@desc     Login user
-//@access   Public
+//@route   POST api/auth
+//@desc    Authenticate user & get token
+//@access  public
 
-exports.login = async (req, res) => {
-    res.json({ msg: 'Login a user' });
-};
+exports.login = asyncHandler(async (req, res, next) => {
+    const { email, password } = req.body;
+
+    //Validate email and password
+    if(!email || !password){
+        return res.status(400).json({ errors: [{ msg: 'Please provide an email and password'}]});
+    }
+
+    //See if user exists
+    let user = await User.findOne({ where: { email: email }});
+    /* console.log('User: ', user); */
+    if(!user){
+        return res.status(400).json({ errors: [{ msg:'Invalid credentials' }] });
+    }
+
+    //Compare the input password, plane text, to the encrypted password.
+    const isMatch = await user.matchPassword(password);
+    /* console.log('Is Match: ', isMatch); */
+    if(!isMatch){
+        return res.status(401).json({ errors: [{ msg:'Invalid credentials' }] });
+    }
+
+    //Return jsonwebtoken -> this for users to be logged in right after registration
+    sendTokenResponse(user, 200, res);
+
+});
+
+//@desc   Get current logged in user
+//@route  GET api/auth/me
+//@access Private
+
+exports.getMe = asyncHandler(async (req, res, next) => {   
+    const user = await User.findByPk(req.user.id, {
+        attributes: { exclude: ['password'] }
+    });
+    res.status(200).json({
+        success: true,
+        data: user
+    });
+});
 
 
 //Get Token from model, create a cookie and send response
