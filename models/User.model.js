@@ -12,11 +12,22 @@ const User = sequelize.define('User', {
     email: {
         type: DataTypes.STRING,
         allowNull: false,
-        unique: true
+        unique: true,
+        validate: {
+            isEmail: {
+                msg: 'Please enter a valid email address'
+            }
+        }
     },
     password: {
         type: DataTypes.STRING,
-        allowNull: false
+        allowNull: false,
+        validate: {
+            len: {
+                args: [6, 20],
+                msg: "Password should have at least 6 caracters"
+            }
+        }
     }
 });
 
