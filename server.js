@@ -1,15 +1,24 @@
 const express = require('express');
 const dotenv = require('dotenv');
 const cors = require('cors');
-
-//CORS
-app.use(cors());
+const sequelize = require('./config/db');
 
 // Load env variables
 dotenv.config({ path: './config/config.env' });
 
 const app = express();
 
+//CORS
+app.use(cors());
+
+//Sequelize connection to DB
+sequelize.authenticate()
+ .then(() => {
+   console.log('Connection to DB successfully stablished.');
+ })
+ .catch(err => {
+   console.error('Erro while trying to connect to DB:', err);
+ });
 
 const PORT = process.env.PORT || 5000;
 
