@@ -3,7 +3,9 @@ const dotenv = require('dotenv');
 const cors = require('cors');
 const sequelize = require('./config/db');
 const cookieParser = require('cookie-parser');
-
+const User = require('./models/User.model');
+const Employee = require('./models/Employee.model');
+const Customer = require('./models/Customer.model');
 
 const app = express();
 //CORS
