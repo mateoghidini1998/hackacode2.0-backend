@@ -2,6 +2,7 @@ const { Sequelize, DataTypes } = require('sequelize');
 const sequelize = require('../config/db');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const Employee = require('./Employee.model');
 
 const User = sequelize.define('User', {
     id: {
@@ -67,7 +68,5 @@ User.prototype.matchPassword = function(enteredPassword) {
         return false;
     }
 };
-
-
 
 module.exports = User;

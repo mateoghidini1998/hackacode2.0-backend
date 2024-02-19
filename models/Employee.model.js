@@ -1,11 +1,19 @@
 const { Sequelize, DataTypes } = require('sequelize');
 const sequelize = require('../config/db');
+const User = require('./User.model');
 
 const Employee = sequelize.define('Employee', {
     id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
         autoIncrement: true
+    },
+    user_id: {
+        type: DataTypes.INTEGER,
+        references: {
+            model: 'users',
+            key: 'id'
+        }
     },
     name: {
         type: Sequelize.STRING,
@@ -21,9 +29,6 @@ const Employee = sequelize.define('Employee', {
     },
     birthdate: {
         type: Sequelize.DATE,
-    },
-    email: {
-        type: Sequelize.STRING,
     },
     country: {
         type: Sequelize.STRING,
