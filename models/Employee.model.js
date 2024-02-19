@@ -13,7 +13,9 @@ const Employee = sequelize.define('Employee', {
         references: {
             model: 'users',
             key: 'id'
-        }
+        },
+        required: true,
+        allowNull: false,
     },
     name: {
         type: Sequelize.STRING,
