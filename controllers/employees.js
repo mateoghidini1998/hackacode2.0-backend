@@ -29,3 +29,42 @@ exports.createEmployee = asyncHandler(async (req, res, next) => {
     return res.status(200).json({ employee });
 
 });
+
+
+//@route GET /api/v1/employees
+//@desc Get all employees
+//@access Private
+
+exports.getEmployees = asyncHandler(async (req, res, next) => {
+    const employees = await Employee.findAll();
+    return res.status(200).json({ employees }); 
+});
+
+//@route GET /api/v1/employees/:id
+//@desc Get employee by id
+//@access Private
+
+exports.getEmployee = asyncHandler(async (req, res, next) => {
+    const employee = await Employee.findByPk(req.params.id);
+    return res.status(200).json({ employee });
+});
+
+//@route PUT /api/v1/employees/:id
+//@desc Update employee by id
+//@access Private
+
+exports.updateEmployee = asyncHandler(async (req, res, next) => {
+    const employee = await Employee.findByPk(req.params.id);
+    await employee.update(req.body);
+    return res.status(200).json({ employee });
+});
+
+//@route DELETE /api/v1/employees/:id
+//@desc Delete employee by id
+//@access Private
+
+exports.deleteEmployee = asyncHandler(async (req, res, next) => {
+    const employee = await Employee.findByPk(req.params.id);
+    await employee.destroy();
+    return res.status(200).json({ msg: `Employee with ${req.params.id} was deleted` }); 
+});
