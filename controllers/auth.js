@@ -1,4 +1,5 @@
 const User = require('../models/User.model');
+const Employee = require('../models/Employee.model');
 const asyncHandler = require('../middleware/async');
 
 //@route    POST api/auth/register
@@ -6,21 +7,24 @@ const asyncHandler = require('../middleware/async');
 //@access   Public
 
 exports.register = asyncHandler(async (req, res, next) => {
-    const { email, password } = req.body;
+  const { email, password, name, lastname, address, dni, birthdate, country, phone, position, salary } = req.body;
  
-    let user = await User.findOne({ where: { email } });
+  let user = await User.findOne({ where: { email } });
 
-    if(user){
-        return res.status(400).json({ errors: [{ msg: 'User already exists'}]});
-    }
+  if(user){
+      return res.status(400).json({ errors: [{ msg: 'User already exists'}]});
+  }
 
-    //Create user
-    user = await User.create({ email, password });
+  // Create user
+  user = await User.create({ email, password });
 
-    //Return jsonwebtoken -> this for users to be logged in right after registration
-    /* console.log(user); */
-    sendTokenResponse(user, 200, res);
+  // Use the id of the newly created user to associate the employee
+  const employee = await Employee.create({ user_id: user.id, name, lastname, address, dni, birthdate, country, phone, position, salary });
+
+  // Return jsonwebtoken and employee data
+  sendTokenResponse(user,   200, res, employee);
 });
+
 
 //@route   POST api/auth
 //@desc    Authenticate user & get token
