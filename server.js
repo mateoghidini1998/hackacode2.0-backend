@@ -6,6 +6,9 @@ const cookieParser = require('cookie-parser');
 const User = require('./models/User.model');
 const Employee = require('./models/Employee.model');
 const Customer = require('./models/Customer.model');
+const Sale = require('./models/Sale.model');
+const Service = require('./models/Service.model');
+
 
 const app = express();
 //CORS
@@ -36,8 +39,14 @@ sequelize.authenticate()
  });
 
 sequelize.sync()
- .then(() => console.log('Tables Synced'))
- .catch(error => console.error('Error while syncronizing table:', error));
+
+/*  sequelize.query('SET FOREIGN_KEY_CHECKS =  0')
+ .then(() => sequelize.sync({ force: true }))
+ .then(() => sequelize.query('SET FOREIGN_KEY_CHECKS =  1'))
+ .then(() => console.log('Database synchronized.'))
+ .catch(error => console.error('Error while synchronizing table:', error)); */
+
+
 
 
 app.get('/', (req, res) => res.send('API Running'));

@@ -4,6 +4,9 @@ const bcrypt = require('bcryptjs');
 const Employee = require('./models/Employee.model');
 const Customer = require('./models/Customer.model');
 const User = require('./models/User.model');
+const Sale = require('./models/Sale.model');
+const Service = require('./models/Service.model');
+const SaleService = require('./models/Sale_Services.model');
 
 function generateDni(){
     const dni = faker.string.numeric(8);
@@ -19,6 +22,8 @@ async function seedDatabase(){
     await User.destroy({ where: {}, truncate: true });
     await Employee.destroy({ where: {}, truncate: true });
     await Customer.destroy({ where: {}, truncate: true });
+    await Sale.destroy({ where: {}, truncate: true });
+    await Service.destroy({ where: {}, truncate: true });
 
     // Reactivate Foreign Keys
     await sequelize.query('SET FOREIGN_KEY_CHECKS=1;');
@@ -60,10 +65,38 @@ async function seedDatabase(){
         dni: generateDni(),
     }));
 
-    
+    const servicesItems = ['Hotel Room', 'Flight', 'Car Rental', 'Ski Passes'];
+
+    const services = servicesItems.map(item => ({
+        name: item,
+    }));
+
+    const sales = Array.from({length: 10}, () => ({
+        customer_id: faker.number.int({min: 1, max: 10}),
+        employee_id: faker.number.int({min: 1, max: 10}),
+    }));
+
+
     await Employee.bulkCreate(employees);
     await Customer.bulkCreate(customers);
+    await Service.bulkCreate(services);
+    await Sale.bulkCreate(sales);
 
+    const savedSales = await Sale.findAll();
+    const savedServices = await Service.findAll();
+
+    await Promise.all(savedSales.map(async (sale) => {
+        const numServices = faker.number.int({ min: 1, max: 3 });
+        const selectedServices = faker.helpers.shuffle(savedServices).slice(0, numServices);
+
+        // Crear registros en la tabla intermedia Sale_Services
+        await Promise.all(selectedServices.map(async (service) => {
+            await SaleService.create({
+                sale_id: sale.id,
+                service_id: service.id,
+            });
+        }));
+    }));
 }
 
 seedDatabase();
