@@ -3,11 +3,6 @@ const dotenv = require('dotenv');
 const cors = require('cors');
 const sequelize = require('./config/db');
 const cookieParser = require('cookie-parser');
-const User = require('./models/User.model');
-const Employee = require('./models/Employee.model');
-const Customer = require('./models/Customer.model');
-const Sale = require('./models/Sale.model');
-const Service = require('./models/Service.model');
 
 
 const app = express();
@@ -23,10 +18,12 @@ app.use(cookieParser());
 //Route files
 const auth = require('./routes/auth');
 const employees = require('./routes/employees');
+const customers = require('./routes/customers');
 
 //Define routes
 app.use('/api/v1/auth', auth);
 app.use('/api/v1/employees', employees);
+app.use('/api/v1/customers', customers);
 
 
 //Sequelize connection to DB
@@ -38,14 +35,13 @@ sequelize.authenticate()
    console.error('Erro while trying to connect to DB:', err);
  });
 
-sequelize.sync()
 
-/*  sequelize.query('SET FOREIGN_KEY_CHECKS =  0')
- .then(() => sequelize.sync({ force: true }))
+  sequelize.query('SET FOREIGN_KEY_CHECKS =  0')
+ .then(() => sequelize.sync({ alter: true }))
  .then(() => sequelize.query('SET FOREIGN_KEY_CHECKS =  1'))
  .then(() => console.log('Database synchronized.'))
- .catch(error => console.error('Error while synchronizing table:', error)); */
-
+ .catch(error => console.error('Error while synchronizing table:', error));
+ 
 
 
 
