@@ -20,12 +20,14 @@ const auth = require('./routes/auth');
 const employees = require('./routes/employees');
 const customers = require('./routes/customers');
 const sales = require('./routes/sales');
+const services = require('./routes/services');
 
 //Define routes
 app.use('/api/v1/auth', auth);
 app.use('/api/v1/employees', employees);
 app.use('/api/v1/customers', customers);
 app.use('/api/v1/sales', sales);
+app.use('/api/v1/services', services);
 
 //Sequelize connection to DB
 sequelize.authenticate()
