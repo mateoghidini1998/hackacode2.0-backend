@@ -77,9 +77,6 @@ exports.getMe = asyncHandler(async (req, res, next) => {
 const sendTokenResponse = (user, statusCode, res) => {
    // Create token
     const token = user.getSignedJwtToken();
-    /* console.log('Token: ', token);
-    console.log('User: ', user);
-    console.log('Res: ', res); */
   
     const options = {
       expires: new Date(
@@ -100,3 +97,21 @@ const sendTokenResponse = (user, statusCode, res) => {
         token
       });
 };
+
+
+// @desc      Log user out / clear cookie
+// @route     GET /api/v1/auth/logout
+// @access    Private
+exports.logout = asyncHandler(async (req, res, next) => {
+  res.cookie('token', 'none', {
+    expires: new Date(Date.now() + 10 * 1000),
+    httpOnly: true
+  });
+
+  res.status(200).json({
+    success: true,
+    data: {}
+  });
+});
+
+
