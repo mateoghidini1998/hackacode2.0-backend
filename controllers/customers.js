@@ -2,6 +2,7 @@ const Customer = require('../models/Customer.model')
 const ErrorResponse = require('../utils/errorResponse')
 const asyncHandler = require('../middleware/async')
 const { Op } = require("sequelize");
+const advancedResults = require('../middleware/advancedResults')
 
 //@route   POST /api/v1/customers
 //@desc    Create a customer
@@ -30,11 +31,7 @@ exports.createCustomer = asyncHandler(async (req, res, next) => {
 //@desc    Get all customers
 //@access  Private
 exports.getCustomers = asyncHandler(async (req, res, next) => {
-    const customers = await Customer.findAll()
-    if(customers.length === 0){
-        return next(new ErrorResponse(`No customers found`, 404));
-    }
-    res.status(200).json({ customers });
+    res.status(200).json(res.advancedResults);
 });
 
 //@route  Get /api/v1/customers/:id

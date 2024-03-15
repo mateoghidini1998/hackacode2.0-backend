@@ -8,8 +8,10 @@ const {
     createCustomer,
     updateCustomer
 } = require('../controllers/customers');
+const advancedResults = require('../middleware/advancedResults');
+const Customer = require('../models/Customer.model');
 
-router.get('/', getCustomers);
+router.get('/', advancedResults(Customer), getCustomers);
 router.get('/:id', getCustomer);
 router.delete('/:id', deleteCustomer);
 router.post('/create', createCustomer)

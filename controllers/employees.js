@@ -2,6 +2,7 @@ const Employee = require('../models/Employee.model');
 const User = require('../models/User.model');
 const ErrorResponse = require('../utils/errorResponse');
 const asyncHandler = require('../middleware/async');
+const advancedResults = require('../middleware/advancedResults');
 
 
 //@route POST /api/v1/employees
@@ -36,8 +37,7 @@ exports.createEmployee = asyncHandler(async (req, res, next) => {
 //@access Private
 
 exports.getEmployees = asyncHandler(async (req, res, next) => {
-    const employees = await Employee.findAll();
-    return res.status(200).json({ employees }); 
+    return res.status(200).json( res.advancedResults ); 
 });
 
 //@route GET /api/v1/employees/:id
