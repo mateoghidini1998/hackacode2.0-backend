@@ -40,7 +40,7 @@ exports.createSale = asyncHandler(async (req, res, next) => {
 exports.getSales = asyncHandler(async (req, res, next) => {
     
     const sales = await sequelize.query(`
-        SELECT s.id AS sale_id, s.employee_id, s.customer_id, ss.service_id, sv.service_code, sv.name, sv.description, sv.service_date, sv.price
+        SELECT s.id AS sale_id, s.employee_id, s.customer_id, s.createdAt, ss.service_id, sv.service_code, sv.name, sv.description, sv.service_date, sv.price
         FROM Sales s
         INNER JOIN SalesServices ss ON s.id = ss.sale_id
         INNER JOIN Services sv ON ss.service_id = sv.id;
@@ -52,6 +52,7 @@ exports.getSales = asyncHandler(async (req, res, next) => {
                 sale_id: item.sale_id,
                 employee_id: item.employee_id,
                 customer_id: item.customer_id,
+                createdAt: item.createdAt,
                 services: []
             };
         }
