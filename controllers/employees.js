@@ -46,6 +46,9 @@ exports.getEmployees = asyncHandler(async (req, res, next) => {
 
 exports.getEmployee = asyncHandler(async (req, res, next) => {
     const employee = await Employee.findByPk(req.params.id);
+    if(!employee){
+        return next(new ErrorResponse(`Employee with id: ${req.params.id} does not exist`, 404));
+    }
     return res.status(200).json({ employee });
 });
 
@@ -55,6 +58,11 @@ exports.getEmployee = asyncHandler(async (req, res, next) => {
 
 exports.updateEmployee = asyncHandler(async (req, res, next) => {
     const employee = await Employee.findByPk(req.params.id);
+
+    if(!employee){
+        return next(new ErrorResponse(`Employee with id: ${req.params.id} does not exist`, 404));
+    }
+
     await employee.update(req.body);
     return res.status(200).json({ employee });
 });
@@ -65,6 +73,9 @@ exports.updateEmployee = asyncHandler(async (req, res, next) => {
 
 exports.deleteEmployee = asyncHandler(async (req, res, next) => {
     const employee = await Employee.findByPk(req.params.id);
+    if(!employee){
+        return next(new ErrorResponse(`Employee with id: ${req.params.id} does not exist`, 404));
+    }
     await employee.destroy();
     return res.status(200).json({ msg: `Employee with ${req.params.id} was deleted` }); 
 });
