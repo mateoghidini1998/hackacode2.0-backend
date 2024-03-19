@@ -72,8 +72,23 @@ exports.getMe = asyncHandler(async (req, res, next) => {
 });
 
 
-//Get Token from model, create a cookie and send response
+//@route   PUT api/auth/update
+//@desc    Update user details
+//@access  Private
 
+exports.updateUser = asyncHandler(async (req, res, next) => {
+  const user = await User.findByPk(req.user.id);
+  if(!user){
+      return res.status(400).json({ errors: [{ msg: 'User not found'}]});
+  }
+
+  await user.update(req.body);
+  return res.status(200).json({user})
+
+});
+
+
+//Get Token from model, create a cookie and send response
 const sendTokenResponse = (user, statusCode, res) => {
    // Create token
     const token = user.getSignedJwtToken();
