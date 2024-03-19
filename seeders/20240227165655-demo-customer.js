@@ -20,6 +20,7 @@ module.exports = {
         birthdate: faker.date.past(),
         country: faker.location.country(),
         dni: generateDni(),
+        email: faker.internet.email(),
       });
     }
     await queryInterface.bulkDelete('Customers', null, {});
