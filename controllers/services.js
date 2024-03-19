@@ -18,7 +18,7 @@ exports.getServices = asyncHandler(async (req, res, next) => {
 
 exports.getService = asyncHandler(async (req, res, next) => {
     if(req.params.id){
-        const service = await Service.findById(req.params.id);
+        const service = await Service.findByPk(req.params.id);
         if(!service){
             return next(new ErrorResponse(`Service not found with id of ${req.params.id}`, 404));
         }
@@ -40,7 +40,7 @@ exports.createService = asyncHandler(async (req, res, next) => {
 //@access  Private
 
 exports.updateService = asyncHandler(async (req, res, next) => {
-    const service = await Service.findById(req.params.id);
+    const service = await Service.findByPk(req.params.id);
 
     if(!service){
         return next(new ErrorResponse(`Service not found with id of ${req.params.id}`, 404));
@@ -55,7 +55,7 @@ exports.updateService = asyncHandler(async (req, res, next) => {
 //@access  Private
 
 exports.deleteService = asyncHandler(async (req, res, next) => {
-    const service = await Service.findById(req.params.id);
+    const service = await Service.findByPk(req.params.id);
 
     if(!service){
         return next(new ErrorResponse(`Service not found with id of ${req.params.id}`, 404));
