@@ -37,7 +37,14 @@ exports.createEmployee = asyncHandler(async (req, res, next) => {
 //@access Private
 
 exports.getEmployees = asyncHandler(async (req, res, next) => {
-    return res.status(200).json( res.advancedResults ); 
+    const results = await Employee.findAll({
+        where: {
+            is_active: true
+        }
+    });
+    res.advancedResults = results;
+
+    res.status(200).json(res.advancedResults);
 });
 
 //@route GET /api/v1/employees/:id
@@ -78,4 +85,17 @@ exports.deleteEmployee = asyncHandler(async (req, res, next) => {
     }
     await employee.destroy();
     return res.status(200).json({ msg: `Employee with ${req.params.id} was deleted` }); 
+});
+
+//@route PUT /api/v1/employees/softdelete/:id
+//@desc  Soft delete employee by id
+//@access Private
+
+exports.softDeleteEmployee = asyncHandler(async (req, res, next) => {
+    const employee = await Employee.findByPk(req.params.id);
+    if(!employee){
+        return next(new ErrorResponse(`Employee with id: ${req.params.id} does not exist`, 404));
+    }
+    await employee.update({ is_active: false });
+    res.status(200).json({ success: true, data: {} });
 });

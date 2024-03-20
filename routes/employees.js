@@ -9,6 +9,7 @@ const {
     getEmployee,
     deleteEmployee,
     updateEmployee,
+    softDeleteEmployee
 } = require('../controllers/employees');
 
 router.post('/create', createEmployee);
@@ -16,5 +17,6 @@ router.get('/', advancedResults(Employee), getEmployees);
 router.get('/:id', getEmployee);
 router.delete('/:id', deleteEmployee);
 router.put('/:id', updateEmployee);
+router.put('/softdelete/:id', softDeleteEmployee);
 
 module.exports = router;

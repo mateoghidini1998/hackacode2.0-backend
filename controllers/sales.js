@@ -43,13 +43,15 @@ exports.getSales = asyncHandler(async (req, res, next) => {
         SELECT s.id AS sale_id, s.employee_id, s.customer_id, s.createdAt, ss.service_id, sv.service_code, sv.name, sv.description, sv.service_date, sv.price
         FROM Sales s
         INNER JOIN SalesServices ss ON s.id = ss.sale_id
-        INNER JOIN Services sv ON ss.service_id = sv.id;
+        INNER JOIN Services sv ON ss.service_id = sv.id
+        WHERE s.is_active = true;
     `, { type: QueryTypes.SELECT });
 
     const transformedSales = sales.reduce((acc, item) => {
         if (!acc[item.sale_id]) {
             acc[item.sale_id] = {
                 sale_id: item.sale_id,
+                is_active: item.is_active,
                 employee_id: item.employee_id,
                 customer_id: item.customer_id,
                 createdAt: item.createdAt,
@@ -58,6 +60,7 @@ exports.getSales = asyncHandler(async (req, res, next) => {
         }
         acc[item.sale_id].services.push({
             service_id: item.service_id,
+            is_active: item.is_active,
             service_code: item.service_code,
             name: item.name,
             description: item.description,
@@ -71,7 +74,8 @@ exports.getSales = asyncHandler(async (req, res, next) => {
 
     const totalSalesCount = await sequelize.query(`
         SELECT COUNT(DISTINCT s.id) AS total_sales
-        FROM Sales s;
+        FROM Sales s
+        WHERE s.is_active = true;
     `, { type: QueryTypes.SELECT });
 
 
@@ -136,6 +140,24 @@ exports.deleteSale = asyncHandler(async (req, res, next) => {
 
     res.status(200).json({ success: true, data: {} });
 });
+
+
+//@route PUT /api/v1/sales/softdelete/:id
+//@desc   Soft delete a sales by id
+//@access Private
+
+exports.softDeleteSale = asyncHandler(async (req, res, next) => {
+    const sale = await Sale.findByPk(req.params.id);
+
+    if (!sale) {
+        return next(new ErrorResponse(`Sale not found`, 404));
+    }
+
+    await sale.update({ is_active: false });
+
+    res.status(200).json({ success: true, data: {} });
+});
+
 
 //@route   GET /api/v1/sales/employee/:employeeId
 //@desc    Get all sales by employee id

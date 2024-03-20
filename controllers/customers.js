@@ -31,8 +31,16 @@ exports.createCustomer = asyncHandler(async (req, res, next) => {
 //@desc    Get all customers
 //@access  Private
 exports.getCustomers = asyncHandler(async (req, res, next) => {
+    const results = await Customer.findAll({
+        where: {
+            is_active: true
+        }
+    });
+    res.advancedResults = results;
+
     res.status(200).json(res.advancedResults);
 });
+
 
 //@route  Get /api/v1/customers/:id
 //@desc   Get a customer by id
@@ -57,7 +65,24 @@ exports.deleteCustomer = asyncHandler(async (req, res, next) => {
 
     await customer.destroy()
     res.status(200).json({ success: true, data: {} });
-})
+});
+
+//@route PUT /api/v1/customers/:id
+//@desc   Soft delete a customer by id
+//@access Private
+
+exports.softDeleteCustomer = asyncHandler(async (req, res, next) => {
+    const customer = await Customer.findByPk(req.params.id);
+
+    if (!customer) {
+        return next(new ErrorResponse(`Customer not found`, 404));
+    }
+
+    await customer.update({ is_active: false });
+
+    res.status(200).json({ success: true, data: {} });
+});
+
 
 //@route  PUT /api/v1/customers/:id
 //@desc   Update a customer by id

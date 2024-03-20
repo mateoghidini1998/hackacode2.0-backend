@@ -8,6 +8,13 @@ const advancedResults = require('../middleware/advancedResults');
 //@access  Public
 
 exports.getServices = asyncHandler(async (req, res, next) => {
+    const results = await Service.findAll({
+        where: {
+            is_active: true
+        }
+    });
+    res.advancedResults = results;
+
     res.status(200).json(res.advancedResults);
 });
 
@@ -63,5 +70,22 @@ exports.deleteService = asyncHandler(async (req, res, next) => {
 
     await service.destroy();
     res.status(200).json({ msg: `Service with id ${req.params.id} was deleted` }); 
+    return res.status(200).json({ service }); 
+});
+
+
+//@route  PUT /api/v1/services/softdelete/:id
+//@desc  Soft delete a service
+//@access Private
+
+exports.softDeleteService = asyncHandler(async (req, res, next) => {
+    const service = await Service.findByPk(req.params.id);
+
+    if(!service){
+        return next(new ErrorResponse(`Service not found with id of ${req.params.id}`, 404));
+    }
+
+    await service.update({ is_active: false });
+    res.status(200).json({ success: true, data: {} });
     return res.status(200).json({ service }); 
 });

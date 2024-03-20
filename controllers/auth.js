@@ -113,6 +113,25 @@ const sendTokenResponse = (user, statusCode, res) => {
       });
 };
 
+//@route PUT /api/v1/auth/softdelete/:id
+//@desc   Soft delete a user and employee by id
+//@access Private
+
+exports.softDeleteSale = asyncHandler(async (req, res, next) => {
+  const user = await User.findByPk(req.params.id);
+
+  if (!user) {
+      return next(new ErrorResponse(`User not found`, 404));
+  }
+
+  await user.update({ is_active: false });
+  const employee = await Employee.findOne({ where: { user_id: user.id } });
+  await employee.update({ is_active: false });
+
+  res.status(200).json({ success: true, data: {} });
+});
+
+
 
 // @desc      Log user out / clear cookie
 // @route     GET /api/v1/auth/logout
