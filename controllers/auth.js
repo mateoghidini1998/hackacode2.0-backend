@@ -21,8 +21,7 @@ exports.register = asyncHandler(async (req, res, next) => {
   // Use the id of the newly created user to associate the employee
   const employee = await Employee.create({ user_id: user.id, name, lastname, address, dni, birthdate, country, phone, position, salary });
 
-  // Return jsonwebtoken and employee data
-  sendTokenResponse(user,   200, res, employee);
+  return res.status(201).json({ user, employee });
 });
 
 
