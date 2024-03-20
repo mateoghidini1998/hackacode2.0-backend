@@ -31,6 +31,10 @@ module.exports = {
         type: Sequelize.DECIMAL(20,2),
         allowNull: false,
       },
+      is_active: {
+        type: Sequelize.BOOLEAN,
+        defaultValue: true
+      },
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE

@@ -25,6 +25,10 @@ const Sale = sequelize.define('Sale', {
         required: true,
         allowNull: false,
     },
+    is_active: {
+        type: Sequelize.BOOLEAN,
+        defaultValue: true
+    },
     
 });
 

@@ -29,7 +29,11 @@ const User = sequelize.define('User', {
                 msg: "Password should have at least 6 caracters"
             }
         }
-    }
+    },
+    is_active: {
+        type: Sequelize.BOOLEAN,
+        defaultValue: true
+    },
 });
 
 

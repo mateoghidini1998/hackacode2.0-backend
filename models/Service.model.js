@@ -30,7 +30,10 @@ const Service = sequelize.define('Service', {
         type: Sequelize.DECIMAL(20,2),
         allowNull: false,
     },
-
+    is_active: {
+        type: Sequelize.BOOLEAN,
+        defaultValue: true
+    },
 });
 
 module.exports = Service;

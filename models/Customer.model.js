@@ -41,6 +41,10 @@ const Customer = sequelize.define('Customer', {
         type: Sequelize.STRING,
         allowNull: false
     },
+    is_active: {
+        type: Sequelize.BOOLEAN,
+        defaultValue: true,
+    },
 });
 
 

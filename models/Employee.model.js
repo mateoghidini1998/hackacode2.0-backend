@@ -45,7 +45,11 @@ const Employee = sequelize.define('Employee', {
     salary: {
       type: Sequelize.FLOAT,
       allowNull: false,
-    }
+    },
+    is_active: {
+        type: Sequelize.BOOLEAN,
+        defaultValue: true
+    },
 });
 
 module.exports = Employee;

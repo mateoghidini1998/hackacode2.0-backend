@@ -24,7 +24,11 @@ const SalesServices = sequelize.define('SalesServices', {
             model: 'services',
             key: 'id'
         },
-    }
+    },
+    is_active: {
+        type: Sequelize.BOOLEAN,
+        defaultValue: true
+    },
 }, {
     tableName: 'SalesServices', 
     timestamps: false, 
