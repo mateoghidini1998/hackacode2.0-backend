@@ -11,9 +11,9 @@ const sequelize = require('../config/db');
 //@access  Private
 
 exports.createSale = asyncHandler(async (req, res, next) => {
-    const { services, customer_id, employee_id } = req.body;
+    const { services, customer_id, employee_id, is_active } = req.body;
 
-    const sale = await Sale.create({ employee_id, customer_id });
+    const sale = await Sale.create({ employee_id, customer_id, is_active });
 
     const saleServices = await Promise.all(services.map(async (serviceData) => {
         const { id } = serviceData;
@@ -27,6 +27,7 @@ exports.createSale = asyncHandler(async (req, res, next) => {
         return await SalesServices.create({ 
             sale_id: sale.id, 
             service_id: id, 
+            is_active: true,
         });
     }));
 
@@ -168,7 +169,7 @@ exports.getSalesByEmployeeId = asyncHandler(async (req, res, next) => {
 
     const sale = await sequelize.query(`
       SELECT 
-        s.id AS sale_id, s.employee_id, s.customer_id, ss.service_id, sv.service_code, sv.name, sv.description, sv.service_date, sv.price
+        s.id AS sale_id, s.employee_id, s.customer_id, ss.service_id, sv.service_code, sv.name, sv.description, sv.service_date, sv.price, COUNT(s.id) OVER() AS total_sales
       FROM 
         Sales s
       INNER JOIN 
@@ -189,10 +190,11 @@ exports.getSalesByEmployeeId = asyncHandler(async (req, res, next) => {
     const transformedSale = sale.reduce((acc, item) => {
         if (!acc[item.sale_id]) {
             acc[item.sale_id] = {
+                count: item.total_sales,
                 sale_id: item.sale_id,
                 employee_id: item.employee_id,
                 customer_id: item.customer_id,
-                services: []
+                services: [],
             };
         }
         acc[item.sale_id].services.push({
