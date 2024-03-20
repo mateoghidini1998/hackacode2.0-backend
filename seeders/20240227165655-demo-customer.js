@@ -6,7 +6,7 @@ module.exports = {
   up: async (queryInterface, Sequelize) => {
 
     function generateDni(){
-      const dni = faker.string.numeric(8);
+      const dni = faker.string.numeric(8)
       return dni;
     }
 
@@ -16,15 +16,16 @@ module.exports = {
         name: faker.person.firstName(),
         lastname: faker.person.lastName(),
         address: faker.location.streetAddress(),
-        phone: faker.phone.number(),
-        birthdate: faker.date.past(),
-        country: faker.location.country(),
         dni: generateDni(),
         email: faker.internet.email(),
+        birthdate: faker.date.past(),
+        country: faker.location.country(),
+        phone: faker.phone.number(),
       });
     }
     await queryInterface.bulkDelete('Customers', null, {});
     await queryInterface.bulkInsert('Customers', dummyJSON, {});
+    console.log(dummyJSON)
   },
   down: async (queryInterface, Sequelize) => {
     await queryInterface.bulkDelete('Customers', null, {});

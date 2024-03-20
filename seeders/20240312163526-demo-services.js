@@ -25,7 +25,7 @@ const uniqueProduct = memoizeUnique(faker.commerce.product);
 module.exports = {
  async up (queryInterface, Sequelize) {
     
-    await queryInterface.bulkDelete('Customers', null, {});
+    await queryInterface.bulkDelete('Services', null, {});
 
     for(var i = 0; i < 10; i++){
       const service = await Service.create({
@@ -40,6 +40,6 @@ module.exports = {
  },
 
  async down (queryInterface, Sequelize) {
-    await queryInterface.bulkDelete('Customers', null, {});
+    await queryInterface.bulkDelete('Services', null, {});
  }
 };
