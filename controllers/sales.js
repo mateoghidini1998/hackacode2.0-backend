@@ -270,4 +270,37 @@ exports.updateSale = asyncHandler(async (req, res, next) => {
 });
 
 
+//@route  GET /api/v1/sales/most-sales/:year
+//@desc   Get employee with most sales in a year
+//@access Private
+exports.getEmployeeWithMostSalesInYear = asyncHandler(async (req, res, next) => {
+    const year = req.params.year; 
 
+    const startOfYear = new Date(year, 0, 1);
+    const endOfYear = new Date(year, 11, 31, 23, 59, 59);
+
+    const result = await sequelize.query(`
+        SELECT 
+            employee_id, COUNT(*) AS sales_count
+        FROM 
+            Sales
+        WHERE 
+            createdAt BETWEEN :startOfYear AND :endOfYear
+        GROUP BY 
+            employee_id
+        ORDER BY 
+            sales_count DESC
+        LIMIT 1
+    `, {
+        replacements: { startOfYear: startOfYear, endOfYear: endOfYear },
+        type: sequelize.QueryTypes.SELECT
+    });
+
+    if (!result || result.length === 0) {
+        return next(new ErrorResponse(`No sales found for the year: ${year}`, 404));
+    }
+
+    const employeeWithMostSales = result[0];
+
+    res.status(200).json({ result: employeeWithMostSales });
+});
