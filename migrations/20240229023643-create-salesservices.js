@@ -27,14 +27,14 @@ module.exports = {
           model: 'services',
           key: 'id'
         },
-        is_active: {
-          type: Sequelize.BOOLEAN,
-          defaultValue: true
-        },
         primaryKey: true,
         onDelete: 'CASCADE',
         onUpdate: 'CASCADE' 
-      }
+      },
+      is_active: {
+        type: Sequelize.BOOLEAN,
+        defaultValue: true
+      },
     });
  },
  down: async (queryInterface, Sequelize) => {

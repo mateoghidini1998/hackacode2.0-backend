@@ -4,7 +4,6 @@ const ErrorResponse = require('../utils/errorResponse');
 const asyncHandler = require('../middleware/async');
 const advancedResults = require('../middleware/advancedResults');
 
-
 //@route POST /api/v1/employees
 //@desc Create new employee
 //@access Private
@@ -99,3 +98,5 @@ exports.softDeleteEmployee = asyncHandler(async (req, res, next) => {
     await employee.update({ is_active: false });
     res.status(200).json({ success: true, data: {} });
 });
+
+

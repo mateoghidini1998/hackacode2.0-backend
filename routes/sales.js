@@ -8,7 +8,8 @@ const {
     deleteSale,
     getSalesByEmployeeId,
     getSalesByCustomerId,
-    softDeleteSale
+    softDeleteSale,
+    getEmployeeWithMostSalesInYear
 } = require('../controllers/sales')
 
 router.post('/', createSale);
@@ -18,6 +19,7 @@ router.delete('/:id', deleteSale);
 router.get('/employee/:id', getSalesByEmployeeId);
 router.get('/customer/:id', getSalesByCustomerId);
 router.put('/softDelete/:id', softDeleteSale);
+router.get('/most-sales/:year', getEmployeeWithMostSalesInYear);
 
 
 module.exports = router;

@@ -9,11 +9,10 @@ const sequelize = require('../config/db');
 //@route   POST /api/v1/sales
 //@desc    Create Sale
 //@access  Private
-
 exports.createSale = asyncHandler(async (req, res, next) => {
-    const { services, customer_id, employee_id } = req.body;
+    const { services, customer_id, employee_id, is_active } = req.body;
 
-    const sale = await Sale.create({ employee_id, customer_id });
+    const sale = await Sale.create({ employee_id, customer_id, is_active });
 
     const saleServices = await Promise.all(services.map(async (serviceData) => {
         const { id } = serviceData;
@@ -27,6 +26,7 @@ exports.createSale = asyncHandler(async (req, res, next) => {
         return await SalesServices.create({ 
             sale_id: sale.id, 
             service_id: id, 
+            is_active: true,
         });
     }));
 
@@ -36,7 +36,6 @@ exports.createSale = asyncHandler(async (req, res, next) => {
 //@route   GET /api/v1/sales
 //@desc    Get all sales
 //@access  Private
-
 exports.getSales = asyncHandler(async (req, res, next) => {
     
     const sales = await sequelize.query(`
@@ -87,7 +86,6 @@ exports.getSales = asyncHandler(async (req, res, next) => {
 //@route  GET /api/v1/sales/:id
 //@desc   Get sale by id
 //@access Private
-
 exports.getSaleById = asyncHandler(async (req, res, next) => {
     const saleId = req.params.id;
 
@@ -125,8 +123,6 @@ exports.getSaleById = asyncHandler(async (req, res, next) => {
 //@route DELETE /api/v1/sales/:id
 //@desc  Delete sale by id
 //@access Private
-
-
 exports.deleteSale = asyncHandler(async (req, res, next) => {
     const saleId = req.params.id;
 
@@ -145,7 +141,6 @@ exports.deleteSale = asyncHandler(async (req, res, next) => {
 //@route PUT /api/v1/sales/softdelete/:id
 //@desc   Soft delete a sales by id
 //@access Private
-
 exports.softDeleteSale = asyncHandler(async (req, res, next) => {
     const sale = await Sale.findByPk(req.params.id);
 
@@ -162,9 +157,13 @@ exports.softDeleteSale = asyncHandler(async (req, res, next) => {
 //@route   GET /api/v1/sales/employee/:employeeId
 //@desc    Get all sales by employee id
 //@access Private
-
 exports.getSalesByEmployeeId = asyncHandler(async (req, res, next) => {
     const employeeId = req.params.id;
+
+    const totalSales = await Sale.count({
+        where: { employee_id: employeeId },
+        distinct: 'id' 
+    });
 
     const sale = await sequelize.query(`
       SELECT 
@@ -192,7 +191,7 @@ exports.getSalesByEmployeeId = asyncHandler(async (req, res, next) => {
                 sale_id: item.sale_id,
                 employee_id: item.employee_id,
                 customer_id: item.customer_id,
-                services: []
+                services: [],
             };
         }
         acc[item.sale_id].services.push({
@@ -201,21 +200,31 @@ exports.getSalesByEmployeeId = asyncHandler(async (req, res, next) => {
             name: item.name,
             description: item.description,
             service_date: item.service_date,
-            price: item.price
+            price: parseFloat(item.price) 
         });
         return acc;
     }, {});
 
-    const saleData = Object.values(transformedSale);
+    
+    const total = Object.values(transformedSale).reduce((acc, sale) => {
+        const saleTotal = sale.services.reduce((total, service) => total + parseFloat(service.price), 0);
+        return acc + saleTotal;
+    }, 0);
+
+    const saleData = {
+        count: totalSales,
+        total: total,
+        sales: Object.values(transformedSale)
+    };
 
     res.status(200).json({ result: saleData });
 });
 
 
+
 //@route   GET /api/v1/sales/customer/:customerId
 //@desc    Get all sales by customer id
 //@access Private
-
 exports.getSalesByCustomerId = asyncHandler(async (req, res, next) => {
     const customerId = req.params.id;
     const result = await sequelize.query(`
@@ -245,7 +254,6 @@ exports.getSalesByCustomerId = asyncHandler(async (req, res, next) => {
 //@route  PUT /api/v1/sales/:id
 //@desc   Update sale by id
 //@access Private
-
 exports.updateSale = asyncHandler(async (req, res, next) => {
     const saleId = req.params.id;
 
@@ -262,4 +270,37 @@ exports.updateSale = asyncHandler(async (req, res, next) => {
 });
 
 
+//@route  GET /api/v1/sales/most-sales/:year
+//@desc   Get employee with most sales in a year
+//@access Private
+exports.getEmployeeWithMostSalesInYear = asyncHandler(async (req, res, next) => {
+    const year = req.params.year; 
 
+    const startOfYear = new Date(year, 0, 1);
+    const endOfYear = new Date(year, 11, 31, 23, 59, 59);
+
+    const result = await sequelize.query(`
+        SELECT 
+            employee_id, COUNT(*) AS sales_count
+        FROM 
+            Sales
+        WHERE 
+            createdAt BETWEEN :startOfYear AND :endOfYear
+        GROUP BY 
+            employee_id
+        ORDER BY 
+            sales_count DESC
+        LIMIT 1
+    `, {
+        replacements: { startOfYear: startOfYear, endOfYear: endOfYear },
+        type: sequelize.QueryTypes.SELECT
+    });
+
+    if (!result || result.length === 0) {
+        return next(new ErrorResponse(`No sales found for the year: ${year}`, 404));
+    }
+
+    const employeeWithMostSales = result[0];
+
+    res.status(200).json({ result: employeeWithMostSales });
+});
