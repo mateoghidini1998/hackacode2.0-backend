@@ -9,7 +9,6 @@ const sequelize = require('../config/db');
 //@route   POST /api/v1/sales
 //@desc    Create Sale
 //@access  Private
-
 exports.createSale = asyncHandler(async (req, res, next) => {
     const { services, customer_id, employee_id, is_active } = req.body;
 
@@ -37,7 +36,6 @@ exports.createSale = asyncHandler(async (req, res, next) => {
 //@route   GET /api/v1/sales
 //@desc    Get all sales
 //@access  Private
-
 exports.getSales = asyncHandler(async (req, res, next) => {
     
     const sales = await sequelize.query(`
@@ -88,7 +86,6 @@ exports.getSales = asyncHandler(async (req, res, next) => {
 //@route  GET /api/v1/sales/:id
 //@desc   Get sale by id
 //@access Private
-
 exports.getSaleById = asyncHandler(async (req, res, next) => {
     const saleId = req.params.id;
 
@@ -126,8 +123,6 @@ exports.getSaleById = asyncHandler(async (req, res, next) => {
 //@route DELETE /api/v1/sales/:id
 //@desc  Delete sale by id
 //@access Private
-
-
 exports.deleteSale = asyncHandler(async (req, res, next) => {
     const saleId = req.params.id;
 
@@ -146,7 +141,6 @@ exports.deleteSale = asyncHandler(async (req, res, next) => {
 //@route PUT /api/v1/sales/softdelete/:id
 //@desc   Soft delete a sales by id
 //@access Private
-
 exports.softDeleteSale = asyncHandler(async (req, res, next) => {
     const sale = await Sale.findByPk(req.params.id);
 
@@ -163,13 +157,17 @@ exports.softDeleteSale = asyncHandler(async (req, res, next) => {
 //@route   GET /api/v1/sales/employee/:employeeId
 //@desc    Get all sales by employee id
 //@access Private
-
 exports.getSalesByEmployeeId = asyncHandler(async (req, res, next) => {
     const employeeId = req.params.id;
 
+    const totalSales = await Sale.count({
+        where: { employee_id: employeeId },
+        distinct: 'id' 
+    });
+
     const sale = await sequelize.query(`
       SELECT 
-        s.id AS sale_id, s.employee_id, s.customer_id, ss.service_id, sv.service_code, sv.name, sv.description, sv.service_date, sv.price, COUNT(s.id) OVER() AS total_sales
+        s.id AS sale_id, s.employee_id, s.customer_id, ss.service_id, sv.service_code, sv.name, sv.description, sv.service_date, sv.price
       FROM 
         Sales s
       INNER JOIN 
@@ -190,7 +188,6 @@ exports.getSalesByEmployeeId = asyncHandler(async (req, res, next) => {
     const transformedSale = sale.reduce((acc, item) => {
         if (!acc[item.sale_id]) {
             acc[item.sale_id] = {
-                count: item.total_sales,
                 sale_id: item.sale_id,
                 employee_id: item.employee_id,
                 customer_id: item.customer_id,
@@ -203,21 +200,31 @@ exports.getSalesByEmployeeId = asyncHandler(async (req, res, next) => {
             name: item.name,
             description: item.description,
             service_date: item.service_date,
-            price: item.price
+            price: parseFloat(item.price) 
         });
         return acc;
     }, {});
 
-    const saleData = Object.values(transformedSale);
+    
+    const total = Object.values(transformedSale).reduce((acc, sale) => {
+        const saleTotal = sale.services.reduce((total, service) => total + parseFloat(service.price), 0);
+        return acc + saleTotal;
+    }, 0);
+
+    const saleData = {
+        count: totalSales,
+        total: total,
+        sales: Object.values(transformedSale)
+    };
 
     res.status(200).json({ result: saleData });
 });
 
 
+
 //@route   GET /api/v1/sales/customer/:customerId
 //@desc    Get all sales by customer id
 //@access Private
-
 exports.getSalesByCustomerId = asyncHandler(async (req, res, next) => {
     const customerId = req.params.id;
     const result = await sequelize.query(`
@@ -247,7 +254,6 @@ exports.getSalesByCustomerId = asyncHandler(async (req, res, next) => {
 //@route  PUT /api/v1/sales/:id
 //@desc   Update sale by id
 //@access Private
-
 exports.updateSale = asyncHandler(async (req, res, next) => {
     const saleId = req.params.id;
 
