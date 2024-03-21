@@ -25,6 +25,14 @@ const Sale = sequelize.define('Sale', {
         required: true,
         allowNull: false,
     },
+    payment_method: {
+        type: Sequelize.ENUM('ewallet', 'debit', 'credit', 'cash', 'transfer'),
+        allowNull: false
+    },
+    profit: {
+        type: Sequelize.FLOAT,
+        allowNull: false,
+    },
     is_active: {
         type: Sequelize.BOOLEAN,
         defaultValue: true

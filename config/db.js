@@ -6,7 +6,8 @@ const sequelize = new Sequelize(
  {
    host: 'localhost',
    dialect: 'mysql',
-   logging: console.log
+   logging: console.log,
+   insecureAuth: true 
  }
 );
 

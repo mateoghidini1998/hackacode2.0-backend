@@ -10,15 +10,25 @@ const sequelize = require('../config/db');
 //@desc    Create Sale
 //@access  Private
 exports.createSale = asyncHandler(async (req, res, next) => {
-    const { services, customer_id, employee_id, is_active } = req.body;
+    const { services, customer_id, employee_id, is_active, payment_method } = req.body;
 
-    const sale = await Sale.create({ employee_id, customer_id, is_active });
+    const totalPrice = await Promise.all(services.map(async (serviceData) => {
+        const { id } = serviceData;
+        const service = await Service.findByPk(id, { attributes: ['id', 'price'] });
+        
+        if (!service) {
+            return next(new ErrorResponse(`Service with id: ${id} not found`, 404));
+        }
+
+        return service.price;
+    })).then(prices => prices.reduce((acc, price) => acc + price, 0));
+
+    const sale = await Sale.create({ employee_id, customer_id, is_active, payment_method, profit: totalPrice });
 
     const saleServices = await Promise.all(services.map(async (serviceData) => {
         const { id } = serviceData;
-        console.log('servicedata: ', serviceData)
-        const service = await Service.findByPk(id, { attributes: ['id'] });
-        console.log('service: ', service)
+        const service = await Service.findByPk(id, { attributes: ['id', 'price'] });
+        
         if (!service) {
             return next(new ErrorResponse(`Service with id: ${id} not found`, 404));
         }
@@ -30,8 +40,21 @@ exports.createSale = asyncHandler(async (req, res, next) => {
         });
     }));
 
+    await sequelize.query(`
+        UPDATE sales 
+        SET profit = COALESCE(
+            (SELECT SUM(services.price) 
+             FROM salesservices 
+             JOIN services ON salesservices.service_id = services.id 
+             WHERE salesservices.sale_id = sales.id), 0
+        )
+        WHERE id = :saleId
+    `, { replacements: { saleId: sale.id }, type: sequelize.QueryTypes.UPDATE });
+
     res.status(201).json({ sale, saleServices });
 });
+
+
 
 //@route   GET /api/v1/sales
 //@desc    Get all sales
@@ -39,7 +62,7 @@ exports.createSale = asyncHandler(async (req, res, next) => {
 exports.getSales = asyncHandler(async (req, res, next) => {
     
     const sales = await sequelize.query(`
-        SELECT s.id AS sale_id, s.employee_id, s.customer_id, s.createdAt, ss.service_id, sv.service_code, sv.name, sv.description, sv.service_date, sv.price
+        SELECT s.id AS sale_id, s.employee_id, s.customer_id, s.payment_method, s.is_active ,s.createdAt, ss.service_id, sv.service_code, sv.name, sv.description, sv.service_date, sv.price
         FROM Sales s
         INNER JOIN SalesServices ss ON s.id = ss.sale_id
         INNER JOIN Services sv ON ss.service_id = sv.id
@@ -51,6 +74,7 @@ exports.getSales = asyncHandler(async (req, res, next) => {
             acc[item.sale_id] = {
                 sale_id: item.sale_id,
                 is_active: item.is_active,
+                payment_method: item.payment_method,
                 employee_id: item.employee_id,
                 customer_id: item.customer_id,
                 createdAt: item.createdAt,
