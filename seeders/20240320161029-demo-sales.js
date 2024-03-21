@@ -20,24 +20,31 @@ module.exports = {
     const paymentMethods = ['ewallet', 'debit', 'credit', 'cash', 'transfer'];
     const employees = await Employee.findAll();
     const customers = await Customer.findAll();
-    const services = await Service.findAll();
-    const maxEmployeeId = employees.length;
-    const maxCustomerId = customers.length;
     
     const dummyJSON = [];
-    for(var i =  0 ; i <  maxEmployeeId ; i++){
-      const fromDate = new Date('2020-01-01');
-      const toDate = new Date('2024-01-01');
-      const randomDate = getRandomDate(fromDate, toDate);
-      const randomPaymentMethod = paymentMethods[Math.floor(Math.random() * paymentMethods.length)];
+    employees.forEach(employee => {
+      // Determinar aleatoriamente si el empleado realizará una venta
+      const willSell = Math.random() < 0.7; // Ajusta este valor para cambiar la probabilidad de venta
 
-      dummyJSON.push({
-        employee_id: employees[i].id,
-        customer_id: customers[i].id,
-        payment_method: randomPaymentMethod,
-        createdAt: randomDate,
-      });
-    }
+      if (willSell) {
+        // Si el empleado va a realizar una venta
+        const fromDate = new Date('2020-01-01');
+        const toDate = new Date('2024-01-01');
+        const randomDate = getRandomDate(fromDate, toDate);
+        const randomPaymentMethod = paymentMethods[Math.floor(Math.random() * paymentMethods.length)];
+
+        // Seleccionar un cliente aleatorio para la venta
+        const randomCustomer = customers[Math.floor(Math.random() * customers.length)];
+
+        dummyJSON.push({
+          employee_id: employee.id,
+          customer_id: randomCustomer.id,
+          payment_method: randomPaymentMethod,
+          createdAt: randomDate,
+        });
+      }
+    });
+
     await queryInterface.bulkDelete('Sales', null, {});
     await queryInterface.bulkInsert('Sales', dummyJSON, {});
 
