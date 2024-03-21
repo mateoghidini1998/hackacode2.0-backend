@@ -28,6 +28,7 @@ module.exports = {
         salary: faker.string.numeric(4),
         //for createdAt value
         createdAt: new Date(),
+        updatedAt: new Date(),
         user_id: users[i].id
       });
     }
