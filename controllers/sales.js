@@ -20,10 +20,33 @@ exports.createSale = asyncHandler(async (req, res, next) => {
             return next(new ErrorResponse(`Service with id: ${id} not found`, 404));
         }
 
-        return service.price;
+        return parseFloat(service.price);
     })).then(prices => prices.reduce((acc, price) => acc + price, 0));
 
-    const sale = await Sale.create({ employee_id, customer_id, is_active, payment_method, profit: totalPrice });
+    let commissionRate = 0;
+    switch (payment_method) {
+        case 'cash':
+            commissionRate = 0;
+            break;
+        case 'debit':
+            commissionRate = 0.03; // 3%
+            break;
+        case 'credit':
+            commissionRate = 0.09; // 9%
+            break;
+        case 'ewallet':
+            commissionRate = 0;
+            break;
+        case 'transfer':
+            commissionRate = 0.0245; // 2.45%
+            break;
+        default:
+            return next(new ErrorResponse(`Invalid payment method: ${payment_method}`, 400));
+    }
+
+    const finalProfit = totalPrice + (totalPrice * commissionRate);
+
+    const sale = await Sale.create({ employee_id, customer_id, is_active, payment_method, profit: parseFloat(finalProfit) });
 
     const saleServices = await Promise.all(services.map(async (serviceData) => {
         const { id } = serviceData;
@@ -55,14 +78,13 @@ exports.createSale = asyncHandler(async (req, res, next) => {
 });
 
 
-
 //@route   GET /api/v1/sales
 //@desc    Get all sales
 //@access  Private
 exports.getSales = asyncHandler(async (req, res, next) => {
     
     const sales = await sequelize.query(`
-        SELECT s.id AS sale_id, s.employee_id, s.customer_id, s.payment_method, s.is_active ,s.createdAt, ss.service_id, sv.service_code, sv.name, sv.description, sv.service_date, sv.price
+        SELECT s.id AS sale_id, s.employee_id, s.customer_id, s.payment_method, s.profit, s.is_active ,s.createdAt, ss.service_id, sv.service_code, sv.name, sv.description, sv.service_date, sv.price
         FROM Sales s
         INNER JOIN SalesServices ss ON s.id = ss.sale_id
         INNER JOIN Services sv ON ss.service_id = sv.id
@@ -74,6 +96,7 @@ exports.getSales = asyncHandler(async (req, res, next) => {
             acc[item.sale_id] = {
                 sale_id: item.sale_id,
                 is_active: item.is_active,
+                profit: item.profit,
                 payment_method: item.payment_method,
                 employee_id: item.employee_id,
                 customer_id: item.customer_id,
