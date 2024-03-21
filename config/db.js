@@ -2,9 +2,9 @@ const Sequelize = require("sequelize");
 const sequelize = new Sequelize(
  'hackacode2.0',
  'root',
- '',
+ 'your_password',
  {
-   host: 'localhost',
+   host: 'hackacode2.0',
    dialect: 'mysql',
    logging: console.log
  }
