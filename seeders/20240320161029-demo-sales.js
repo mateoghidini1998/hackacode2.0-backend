@@ -31,11 +31,11 @@ module.exports = {
         createdAt: randomDate,
       });
     }
-    await queryInterface.bulkDelete('Sales', null, {});
-    await queryInterface.bulkInsert('Sales', dummyJSON, {});
+    await queryInterface.bulkDelete('sales', null, {});
+    await queryInterface.bulkInsert('sales', dummyJSON, {});
   },
   down: async (queryInterface, Sequelize) => {
-    await queryInterface.bulkDelete('Sales', null, {});
+    await queryInterface.bulkDelete('sales', null, {});
   }
 };
 

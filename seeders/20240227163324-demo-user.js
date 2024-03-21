@@ -18,13 +18,13 @@ module.exports = {
         updatedAt : new Date()
       });
     }
-    await queryInterface.bulkDelete('Employees', null, {});
-    await queryInterface.bulkDelete('Users', null, {});
+    await queryInterface.bulkDelete('employees', null, {});
+    await queryInterface.bulkDelete('users', null, {});
 
-    await queryInterface.bulkInsert('Users', dummyJSON, {});
+    await queryInterface.bulkInsert('users', dummyJSON, {});
   },
 
   down: async (queryInterface, Sequelize) => {
-    await queryInterface.bulkDelete('Users', null, {});
+    await queryInterface.bulkDelete('users', null, {});
   }
 };

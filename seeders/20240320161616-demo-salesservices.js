@@ -19,11 +19,11 @@ module.exports = {
         service_id: services[randomServiceIndex].id,
       });
     }
-    await queryInterface.bulkDelete('SalesServices', null, {});
-    await queryInterface.bulkInsert('SalesServices', dummyJSON, {});
+    await queryInterface.bulkDelete('salesServices', null, {});
+    await queryInterface.bulkInsert('salesServices', dummyJSON, {});
   },
 
   async down (queryInterface, Sequelize) {
-    await queryInterface.bulkDelete('SalesServices', null, {});
+    await queryInterface.bulkDelete('salesServices', null, {});
   }
 };

@@ -23,11 +23,11 @@ module.exports = {
         phone: faker.phone.number(),
       });
     }
-    await queryInterface.bulkDelete('Customers', null, {});
-    await queryInterface.bulkInsert('Customers', dummyJSON, {});
+    await queryInterface.bulkDelete('customers', null, {});
+    await queryInterface.bulkInsert('customers', dummyJSON, {});
     console.log(dummyJSON)
   },
   down: async (queryInterface, Sequelize) => {
-    await queryInterface.bulkDelete('Customers', null, {});
+    await queryInterface.bulkDelete('customers', null, {});
   }
 };

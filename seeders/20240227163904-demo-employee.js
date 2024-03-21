@@ -29,10 +29,10 @@ module.exports = {
         user_id: users[i].id
       });
     }
-    await queryInterface.bulkDelete('Employees', null, {});
-    await queryInterface.bulkInsert('Employees', dummyJSON, {});
+    await queryInterface.bulkDelete('employees', null, {});
+    await queryInterface.bulkInsert('employees', dummyJSON, {});
   },
   down: async (queryInterface, Sequelize) => {
-    await queryInterface.bulkDelete('Employees', null, {});
+    await queryInterface.bulkDelete('employees', null, {});
   }
 };
