@@ -84,11 +84,28 @@ exports.createSale = asyncHandler(async (req, res, next) => {
 exports.getSales = asyncHandler(async (req, res, next) => {
     
     const sales = await sequelize.query(`
-        SELECT s.id AS sale_id, s.employee_id, s.customer_id, s.payment_method, s.profit, s.is_active ,s.createdAt, ss.service_id, sv.service_code, sv.name, sv.description, sv.service_date, sv.price
-        FROM Sales s
-        INNER JOIN SalesServices ss ON s.id = ss.sale_id
-        INNER JOIN Services sv ON ss.service_id = sv.id
-        WHERE s.is_active = true;
+        SELECT 
+            s.id AS sale_id, 
+            s.employee_id, 
+            s.customer_id, 
+            s.payment_method, 
+            s.profit, 
+            s.is_active ,
+            s.createdAt, 
+            ss.service_id, 
+            sv.service_code, 
+            sv.name, 
+            sv.description, 
+            sv.service_date, 
+            sv.price
+        FROM 
+            Sales s
+        INNER JOIN 
+            SalesServices ss ON s.id = ss.sale_id
+        INNER JOIN 
+            Services sv ON ss.service_id = sv.id
+        WHERE 
+            s.is_active = true;
     `, { type: QueryTypes.SELECT });
 
     const transformedSales = sales.reduce((acc, item) => {
@@ -119,15 +136,34 @@ exports.getSales = asyncHandler(async (req, res, next) => {
     const finalSales = Object.values(transformedSales);
 
     const totalSalesCount = await sequelize.query(`
-        SELECT COUNT(DISTINCT s.id) AS total_sales
-        FROM Sales s
-        WHERE s.is_active = true;
+        SELECT 
+            COUNT(DISTINCT s.id) AS total_sales
+        FROM 
+            Sales s
+        WHERE 
+            s.is_active = true;
     `, { type: QueryTypes.SELECT });
 
+    const profitAndSalesByPaymentMethod = await sequelize.query(`
+        SELECT 
+            payment_method,
+            SUM(profit) AS total_profit,
+            COUNT(*) AS total_sales
+        FROM 
+            Sales
+        WHERE 
+            is_active = true
+        GROUP BY 
+            payment_method;
+    `, { type: QueryTypes.SELECT });
 
-
-    res.status(200).json({total_sales: totalSalesCount[0].total_sales,  sales: finalSales });
+    res.status(200).json({
+        total_sales: totalSalesCount[0].total_sales,  
+        sales: finalSales,
+        profit_by_payment_method: profitAndSalesByPaymentMethod
+    });
 });
+
 
 
 //@route  GET /api/v1/sales/:id

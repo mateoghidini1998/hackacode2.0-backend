@@ -7,9 +7,8 @@ const Service = require('../models/Service.model');
 const Sale = require('../models/Sale.model');
 const SalesServices = require('../models/SalesServices.model');
 
-
 module.exports = {
-  up: async (queryInterface, Sequelize) => {
+ up: async (queryInterface, Sequelize) => {
 
     function getRandomDate(from, to) {
       from = from.getTime();
@@ -23,11 +22,10 @@ module.exports = {
     
     const dummyJSON = [];
     employees.forEach(employee => {
-      // Determinar aleatoriamente si el empleado realizará una venta
-      const willSell = Math.random() < 0.7; // Ajusta este valor para cambiar la probabilidad de venta
+      // Especificar cuántas ventas debe tener cada empleado
+      const salesCount = employee.id === 1 ? 0 : (employee.id === 7 ? 5 : Math.floor(Math.random() * 10));
 
-      if (willSell) {
-        // Si el empleado va a realizar una venta
+      for (let i = 0; i < salesCount; i++) {
         const fromDate = new Date('2020-01-01');
         const toDate = new Date('2024-01-01');
         const randomDate = getRandomDate(fromDate, toDate);
@@ -48,8 +46,8 @@ module.exports = {
     await queryInterface.bulkDelete('Sales', null, {});
     await queryInterface.bulkInsert('Sales', dummyJSON, {});
 
-  },
-  down: async (queryInterface, Sequelize) => {
+ },
+ down: async (queryInterface, Sequelize) => {
     await queryInterface.bulkDelete('Sales', null, {});
-  }
+ }
 };
