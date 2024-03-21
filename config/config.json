@@ -1,7 +1,7 @@
 {
   "development": {
     "username": "root",
-    "password": null,
+    "password": "your_password",
     "database": "hackacode2.0",
     "host": "hackacode2.0",
     "port": 3306,
@@ -9,7 +9,7 @@
   },
   "test": {
     "username": "root",
-    "password": null,
+    "password": "your_password",
     "database": "hackacode2.0",
     "host": "hackacode2.0",
     "port": 3306,
@@ -17,7 +17,7 @@
   },
   "production": {
     "username": "root",
-    "password": null,
+    "password": "your_password",
     "database": "hackacode2.0",
     "host": "hackacode2.0",
     "port": 3306,
