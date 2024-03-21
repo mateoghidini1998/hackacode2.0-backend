@@ -10,12 +10,14 @@ const {
     deleteEmployee,
     updateEmployee,
     softDeleteEmployee,
+    getEmployeeByUserId
 
 } = require('../controllers/employees');
 
 router.post('/create', createEmployee);
 router.get('/', advancedResults(Employee), getEmployees);
 router.get('/:id', getEmployee);
+router.get('/user/:user_id', getEmployeeByUserId)
 router.delete('/:id', deleteEmployee);
 router.put('/:id', updateEmployee);
 router.put('/softdelete/:id', softDeleteEmployee);
