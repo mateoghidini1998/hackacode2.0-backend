@@ -33,7 +33,9 @@ module.exports = {
         name: uniqueProduct(),
         description: faker.commerce.productDescription(),
         price: faker.commerce.price(),
-        service_date: faker.date.future()
+        service_date: faker.date.future(),
+        createdAt: new Date(),
+        updatedAt: new Date()
       })
     }
 

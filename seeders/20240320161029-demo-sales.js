@@ -29,6 +29,7 @@ module.exports = {
         employee_id: employees[i].id,
         customer_id: customers[i].id,
         createdAt: randomDate,
+        updatedAt: new Date()
       });
     }
     await queryInterface.bulkDelete('Sales', null, {});
