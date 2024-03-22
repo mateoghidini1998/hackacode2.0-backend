@@ -1,6 +1,7 @@
 const User = require('../models/User.model');
 const Employee = require('../models/Employee.model');
 const asyncHandler = require('../middleware/async');
+const ErrorResponse = require('../utils/errorResponse');
 
 //@route    POST api/auth/register
 //@desc     Register a user
@@ -34,22 +35,23 @@ exports.login = asyncHandler(async (req, res, next) => {
 
     //Validate email and password
     if(!email || !password){
-        return res.status(400).json({ errors: [{ msg: 'Please provide an email and password'}]});
+        return next(new ErrorResponse('Please provide an email and password', 400));
     }
 
     //See if user exists
     let user = await User.findOne({ where: { email: email }});
-    /* console.log('User: ', user); */
     if(!user){
-        return res.status(400).json({ errors: [{ msg:'Invalid credentials' }] });
+        return next(new ErrorResponse(`No user found with email: ${email}`, 404));
     }
 
     //Compare the input password, plane text, to the encrypted password.
     const isMatch = await user.matchPassword(password);
-    /* console.log('Is Match: ', isMatch); */
     if(!isMatch){
-        return res.status(401).json({ errors: [{ msg:'Invalid credentials' }] });
-    }
+      const error = new ErrorResponse('Invalid credentials', 401);
+      error.message = `Error: ${error.message}`;
+      return next(error);
+  }
+  
 
     //Return jsonwebtoken -> this for users to be logged in right after registration
     sendTokenResponse(user, 200, res);
