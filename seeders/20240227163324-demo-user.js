@@ -9,7 +9,7 @@ module.exports = {
     var dummyJSON = [];
     const salt = await bcrypt.genSalt(10);
     const hash = await bcrypt.hash('123456', salt);
-    for(var i =  0 ; i <  10 ; i++){
+    for(var i =  0 ; i <  30 ; i++){
       dummyJSON.push({
         id: i + 1,
         email: faker.internet.email(),

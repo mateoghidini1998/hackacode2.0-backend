@@ -27,6 +27,14 @@ module.exports = {
           required: true,
           allowNull: false,
       },
+      payment_method: {
+        type: Sequelize.ENUM('ewallet', 'debit', 'credit', 'cash', 'transfer'),
+        allowNull: false
+      },
+      profit: {
+        type: Sequelize.FLOAT,
+        allowNull: false,
+      },
       is_active: {
         type: Sequelize.BOOLEAN,
         defaultValue: true

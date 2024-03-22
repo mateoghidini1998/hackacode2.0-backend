@@ -10,15 +10,48 @@ const sequelize = require('../config/db');
 //@desc    Create Sale
 //@access  Private
 exports.createSale = asyncHandler(async (req, res, next) => {
-    const { services, customer_id, employee_id, is_active } = req.body;
+    const { services, customer_id, employee_id, is_active, payment_method } = req.body;
 
-    const sale = await Sale.create({ employee_id, customer_id, is_active });
+    const totalPrice = await Promise.all(services.map(async (serviceData) => {
+        const { id } = serviceData;
+        const service = await Service.findByPk(id, { attributes: ['id', 'price'] });
+        
+        if (!service) {
+            return next(new ErrorResponse(`Service with id: ${id} not found`, 404));
+        }
+
+        return parseFloat(service.price);
+    })).then(prices => prices.reduce((acc, price) => acc + price, 0));
+
+    let commissionRate = 0;
+    switch (payment_method) {
+        case 'cash':
+            commissionRate = 0;
+            break;
+        case 'debit':
+            commissionRate = 0.03; // 3%
+            break;
+        case 'credit':
+            commissionRate = 0.09; // 9%
+            break;
+        case 'ewallet':
+            commissionRate = 0;
+            break;
+        case 'transfer':
+            commissionRate = 0.0245; // 2.45%
+            break;
+        default:
+            return next(new ErrorResponse(`Invalid payment method: ${payment_method}`, 400));
+    }
+
+    const finalProfit = totalPrice + (totalPrice * commissionRate);
+
+    const sale = await Sale.create({ employee_id, customer_id, is_active, payment_method, profit: parseFloat(finalProfit) });
 
     const saleServices = await Promise.all(services.map(async (serviceData) => {
         const { id } = serviceData;
-        console.log('servicedata: ', serviceData)
-        const service = await Service.findByPk(id, { attributes: ['id'] });
-        console.log('service: ', service)
+        const service = await Service.findByPk(id, { attributes: ['id', 'price'] });
+        
         if (!service) {
             return next(new ErrorResponse(`Service with id: ${id} not found`, 404));
         }
@@ -30,8 +63,20 @@ exports.createSale = asyncHandler(async (req, res, next) => {
         });
     }));
 
+    await sequelize.query(`
+        UPDATE sales 
+        SET profit = COALESCE(
+            (SELECT SUM(services.price) 
+             FROM salesservices 
+             JOIN services ON salesservices.service_id = services.id 
+             WHERE salesservices.sale_id = sales.id), 0
+        )
+        WHERE id = :saleId
+    `, { replacements: { saleId: sale.id }, type: sequelize.QueryTypes.UPDATE });
+
     res.status(201).json({ sale, saleServices });
 });
+
 
 //@route   GET /api/v1/sales
 //@desc    Get all sales
@@ -39,11 +84,28 @@ exports.createSale = asyncHandler(async (req, res, next) => {
 exports.getSales = asyncHandler(async (req, res, next) => {
     
     const sales = await sequelize.query(`
-        SELECT s.id AS sale_id, s.employee_id, s.customer_id, s.createdAt, ss.service_id, sv.service_code, sv.name, sv.description, sv.service_date, sv.price
-        FROM Sales s
-        INNER JOIN SalesServices ss ON s.id = ss.sale_id
-        INNER JOIN Services sv ON ss.service_id = sv.id
-        WHERE s.is_active = true;
+        SELECT 
+            s.id AS sale_id, 
+            s.employee_id, 
+            s.customer_id, 
+            s.payment_method, 
+            s.profit, 
+            s.is_active ,
+            s.createdAt, 
+            ss.service_id, 
+            sv.service_code, 
+            sv.name, 
+            sv.description, 
+            sv.service_date, 
+            sv.price
+        FROM 
+            Sales s
+        INNER JOIN 
+            SalesServices ss ON s.id = ss.sale_id
+        INNER JOIN 
+            Services sv ON ss.service_id = sv.id
+        WHERE 
+            s.is_active = true;
     `, { type: QueryTypes.SELECT });
 
     const transformedSales = sales.reduce((acc, item) => {
@@ -51,6 +113,8 @@ exports.getSales = asyncHandler(async (req, res, next) => {
             acc[item.sale_id] = {
                 sale_id: item.sale_id,
                 is_active: item.is_active,
+                profit: item.profit,
+                payment_method: item.payment_method,
                 employee_id: item.employee_id,
                 customer_id: item.customer_id,
                 createdAt: item.createdAt,
@@ -72,15 +136,34 @@ exports.getSales = asyncHandler(async (req, res, next) => {
     const finalSales = Object.values(transformedSales);
 
     const totalSalesCount = await sequelize.query(`
-        SELECT COUNT(DISTINCT s.id) AS total_sales
-        FROM Sales s
-        WHERE s.is_active = true;
+        SELECT 
+            COUNT(DISTINCT s.id) AS total_sales
+        FROM 
+            Sales s
+        WHERE 
+            s.is_active = true;
     `, { type: QueryTypes.SELECT });
 
+    const profitAndSalesByPaymentMethod = await sequelize.query(`
+        SELECT 
+            payment_method,
+            SUM(profit) AS total_profit,
+            COUNT(*) AS total_sales
+        FROM 
+            Sales
+        WHERE 
+            is_active = true
+        GROUP BY 
+            payment_method;
+    `, { type: QueryTypes.SELECT });
 
-
-    res.status(200).json({total_sales: totalSalesCount[0].total_sales,  sales: finalSales });
+    res.status(200).json({
+        total_sales: totalSalesCount[0].total_sales,  
+        sales: finalSales,
+        profit_by_payment_method: profitAndSalesByPaymentMethod
+    });
 });
+
 
 
 //@route  GET /api/v1/sales/:id

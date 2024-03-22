@@ -36,14 +36,12 @@ exports.createEmployee = asyncHandler(async (req, res, next) => {
 //@access Private
 
 exports.getEmployees = asyncHandler(async (req, res, next) => {
-    const results = await Employee.findAll({
+    const employees = await Employee.findAll({
         where: {
             is_active: true
         }
     });
-    res.advancedResults = results;
-
-    res.status(200).json(res.advancedResults);
+    return res.status(200).json(employees);
 });
 
 //@route GET /api/v1/employees/:id
@@ -100,3 +98,14 @@ exports.softDeleteEmployee = asyncHandler(async (req, res, next) => {
 });
 
 
+//@route GET /api/v1/employees/:user_id
+//@desc Get employee by user_id
+//@access Private
+
+exports.getEmployeeByUserId = asyncHandler(async (req, res, next) => {
+    const employee = await Employee.findOne({ where: { user_id: req.params.user_id } });
+    if(!employee){
+        return next(new ErrorResponse(`Employee with user id: ${req.params.user_id} does not exist`, 404));
+    }
+    return res.status(200).json({ employee }); 
+});

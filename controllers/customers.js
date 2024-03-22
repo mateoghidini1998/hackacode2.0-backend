@@ -31,14 +31,12 @@ exports.createCustomer = asyncHandler(async (req, res, next) => {
 //@desc    Get all customers
 //@access  Private
 exports.getCustomers = asyncHandler(async (req, res, next) => {
-    const results = await Customer.findAll({
+    const customers = await Customer.findAll({
         where: {
             is_active: true
         }
     });
-    res.advancedResults = results;
-
-    res.status(200).json(res.advancedResults);
+    return res.status(200).json(customers);
 });
 
 

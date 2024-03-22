@@ -21,6 +21,7 @@ const employees = require('./routes/employees');
 const customers = require('./routes/customers');
 const sales = require('./routes/sales');
 const services = require('./routes/services');
+const users = require('./routes/users');
 
 //Define routes
 app.use('/api/v1/auth', auth);
@@ -28,6 +29,7 @@ app.use('/api/v1/employees', employees);
 app.use('/api/v1/customers', customers);
 app.use('/api/v1/sales', sales);
 app.use('/api/v1/services', services);
+app.use('/api/v1/users', users);  
 
 //Sequelize connection to DB
 sequelize.authenticate()
@@ -46,15 +48,6 @@ sequelize.authenticate()
  .catch(err => {
    console.error('Erro while trying to connect to DB:', err);
  });
-
-/*   sequelize.query('SET FOREIGN_KEY_CHECKS =  0')
- .then(() => sequelize.sync({ alter: true }))
- .then(() => sequelize.query('SET FOREIGN_KEY_CHECKS =  1'))
- .then(() => console.log('Database synchronized.'))
- .catch(error => console.error('Error while synchronizing table:', error)); */
- 
-
-
 
 app.get('/', (req, res) => res.send('API Running'));
 

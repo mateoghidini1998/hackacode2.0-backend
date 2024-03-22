@@ -11,7 +11,7 @@ module.exports = {
     }
 
     const dummyJSON = [];
-    for(var i =  0 ; i <  10 ; i++){
+    for(var i =  0 ; i <  30 ; i++){
       dummyJSON.push({
         name: faker.person.firstName(),
         lastname: faker.person.lastName(),
