@@ -36,7 +36,12 @@ exports.createEmployee = asyncHandler(async (req, res, next) => {
 //@access Private
 
 exports.getEmployees = asyncHandler(async (req, res, next) => {
-    res.status(200).json(res.advancedResults);
+    const employees = await Employee.findAll({
+        where: {
+            is_active: true
+        }
+    });
+    return res.status(200).json(employees);
 });
 
 //@route GET /api/v1/employees/:id
