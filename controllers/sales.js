@@ -15,7 +15,7 @@ exports.createSale = asyncHandler(async (req, res, next) => {
     const totalPrice = await Promise.all(services.map(async (serviceData) => {
         const { id } = serviceData;
         const service = await Service.findByPk(id, { attributes: ['id', 'price'] });
-        
+
         if (!service) {
             return next(new ErrorResponse(`Service with id: ${id} not found`, 404));
         }
@@ -51,25 +51,25 @@ exports.createSale = asyncHandler(async (req, res, next) => {
     const saleServices = await Promise.all(services.map(async (serviceData) => {
         const { id } = serviceData;
         const service = await Service.findByPk(id, { attributes: ['id', 'price'] });
-        
+
         if (!service) {
             return next(new ErrorResponse(`Service with id: ${id} not found`, 404));
         }
 
-        return await SalesServices.create({ 
-            sale_id: sale.id, 
-            service_id: id, 
+        return await SalesServices.create({
+            sale_id: sale.id,
+            service_id: id,
             is_active: true,
         });
     }));
 
     await sequelize.query(`
-        UPDATE sales 
+        UPDATE Sales 
         SET profit = COALESCE(
-            (SELECT SUM(services.price) 
-             FROM salesservices 
-             JOIN services ON salesservices.service_id = services.id 
-             WHERE salesservices.sale_id = sales.id), 0
+            (SELECT SUM(Services.price) 
+            FROM SalesServices 
+            JOIN Services ON SalesServices.service_id = Services.id 
+            WHERE SalesServices.sale_id = Sales.id), 0
         )
         WHERE id = :saleId
     `, { replacements: { saleId: sale.id }, type: sequelize.QueryTypes.UPDATE });
@@ -82,7 +82,7 @@ exports.createSale = asyncHandler(async (req, res, next) => {
 //@desc    Get all sales
 //@access  Private
 exports.getSales = asyncHandler(async (req, res, next) => {
-    
+
     const sales = await sequelize.query(`
         SELECT 
             s.id AS sale_id, 
@@ -158,7 +158,7 @@ exports.getSales = asyncHandler(async (req, res, next) => {
     `, { type: QueryTypes.SELECT });
 
     res.status(200).json({
-        total_sales: totalSalesCount[0].total_sales,  
+        total_sales: totalSalesCount[0].total_sales,
         sales: finalSales,
         profit_by_payment_method: profitAndSalesByPaymentMethod
     });
@@ -178,8 +178,8 @@ exports.getSaleById = asyncHandler(async (req, res, next) => {
         INNER JOIN SalesServices ss ON s.id = ss.sale_id
         INNER JOIN Services sv ON ss.service_id = sv.id
         WHERE s.id = ${saleId};
-    `, { 
-        type: QueryTypes.SELECT 
+    `, {
+        type: QueryTypes.SELECT
     });
 
     if (!saleQuery || saleQuery.length === 0) {
@@ -245,7 +245,7 @@ exports.getSalesByEmployeeId = asyncHandler(async (req, res, next) => {
 
     const totalSales = await Sale.count({
         where: { employee_id: employeeId },
-        distinct: 'id' 
+        distinct: 'id'
     });
 
     const sale = await sequelize.query(`
@@ -260,8 +260,8 @@ exports.getSalesByEmployeeId = asyncHandler(async (req, res, next) => {
       WHERE 
         s.employee_id = :employeeId
     `, {
-      replacements: { employeeId: employeeId },
-      type: sequelize.QueryTypes.SELECT
+        replacements: { employeeId: employeeId },
+        type: sequelize.QueryTypes.SELECT
     });
 
     if (!sale || sale.length === 0) {
@@ -283,12 +283,12 @@ exports.getSalesByEmployeeId = asyncHandler(async (req, res, next) => {
             name: item.name,
             description: item.description,
             service_date: item.service_date,
-            price: parseFloat(item.price) 
+            price: parseFloat(item.price)
         });
         return acc;
     }, {});
 
-    
+
     const total = Object.values(transformedSale).reduce((acc, sale) => {
         const saleTotal = sale.services.reduce((total, service) => total + parseFloat(service.price), 0);
         return acc + saleTotal;
@@ -322,8 +322,8 @@ exports.getSalesByCustomerId = asyncHandler(async (req, res, next) => {
       WHERE 
         s.customer_id = :customerId
     `, {
-      replacements: { customerId: customerId },
-      type: sequelize.QueryTypes.SELECT
+        replacements: { customerId: customerId },
+        type: sequelize.QueryTypes.SELECT
     });
 
     if (!result || result.length === 0) {
@@ -357,7 +357,7 @@ exports.updateSale = asyncHandler(async (req, res, next) => {
 //@desc   Get employee with most sales in a year
 //@access Private
 exports.getEmployeeWithMostSalesInYear = asyncHandler(async (req, res, next) => {
-    const year = req.params.year; 
+    const year = req.params.year;
 
     const startOfYear = new Date(year, 0, 1);
     const endOfYear = new Date(year, 11, 31, 23, 59, 59);
