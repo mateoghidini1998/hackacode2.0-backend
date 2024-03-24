@@ -338,19 +338,77 @@ exports.getSalesByCustomerId = asyncHandler(async (req, res, next) => {
 //@desc   Update sale by id
 //@access Private
 exports.updateSale = asyncHandler(async (req, res, next) => {
-    const saleId = req.params.id;
+    const { id } = req.params;
+    const { customer_id, employee_id, is_active, payment_method, services } = req.body;
 
-    const sale = await Sale.findByPk(saleId);
-
+    const sale = await Sale.findByPk(id);
     if (!sale) {
-        return next(new ErrorResponse(`Sale with id: ${saleId} not found`, 404));
+        return next(new ErrorResponse(`Sale with id: ${id} not found`, 404));
     }
 
-    await sale.update(req.body);
+    sale.customer_id = customer_id;
+    sale.employee_id = employee_id;
+    sale.is_active = is_active;
+    sale.payment_method = payment_method;
+    await sale.save();
+
+    const currentServiceIds = await SalesServices.findAll({ where: { sale_id: sale.id }, attributes: ['service_id'] }).then(services => services.map(service => service.service_id));
+
+    for (const serviceData of services) {
+        const { id: serviceId } = serviceData;
+        const service = await Service.findByPk(serviceId, { attributes: ['id', 'price'] });
+        if (!service) {
+            return next(new ErrorResponse(`Service with id: ${serviceId} not found`, 404));
+        }
+
+        const saleService = await SalesServices.findOne({ where: { sale_id: sale.id, service_id: serviceId } });
+        if (saleService) {
+            saleService.is_active = true;
+            await saleService.save();
+        } else {
+            await SalesServices.create({ sale_id: sale.id, service_id: serviceId, is_active: true });
+        }
+
+        currentServiceIds.splice(currentServiceIds.indexOf(serviceId), 1);
+    }
+
+    await SalesServices.destroy({ where: { sale_id: sale.id, service_id: currentServiceIds } });
+
+    const totalPrice = await Promise.all(services.map(async (serviceData) => {
+        const { id: serviceId } = serviceData;
+        const service = await Service.findByPk(serviceId, { attributes: ['id', 'price'] });
+        return parseFloat(service.price);
+    })).then(prices => prices.reduce((acc, price) => acc + price, 0));
+
+    let commissionRate = 0;
+    switch (payment_method) {
+        case 'cash':
+            commissionRate = 0;
+            break;
+        case 'debit':
+            commissionRate = 0.03; // 3%
+            break;
+        case 'credit':
+            commissionRate = 0.09; // 9%
+            break;
+        case 'ewallet':
+            commissionRate = 0;
+            break;
+        case 'transfer':
+            commissionRate = 0.0245; // 2.45%
+            break;
+        default:
+            return next(new ErrorResponse(`Invalid payment method: ${payment_method}`, 400));
+    }
+
+    const finalProfit = totalPrice + (totalPrice * commissionRate);
+
+    sale.profit = parseFloat(finalProfit);
+    await sale.save();
 
     res.status(200).json({ sale });
-
 });
+
 
 
 //@route  GET /api/v1/sales/most-sales/:year
