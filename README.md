@@ -111,3 +111,7 @@ yarn sequelize-cli db:seed:all
 ```
 npm run dev
 ```
+
+###Authentication
+
+After running the seeders you can get any email from the users table to try and login with a password '123456'
