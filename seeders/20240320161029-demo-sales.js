@@ -27,7 +27,7 @@ module.exports = {
 
       for (let i = 0; i < salesCount; i++) {
         const fromDate = new Date('2020-01-01');
-        const toDate = new Date('2024-01-01');
+        const toDate = new Date('2025-01-01');
         const randomDate = getRandomDate(fromDate, toDate);
         const randomPaymentMethod = paymentMethods[Math.floor(Math.random() * paymentMethods.length)];
 
