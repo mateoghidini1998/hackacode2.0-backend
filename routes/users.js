@@ -8,6 +8,6 @@ const {
     getUsers
 } = require('../controllers/users');
 
-router.get('/', protect, advancedResults(User), getUsers);
+router.get('/', advancedResults(User), getUsers);
 
 module.exports = router;

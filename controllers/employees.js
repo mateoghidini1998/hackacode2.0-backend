@@ -62,11 +62,16 @@ exports.getEmployee = asyncHandler(async (req, res, next) => {
 
 exports.updateEmployee = asyncHandler(async (req, res, next) => {
     const employee = await Employee.findByPk(req.params.id);
-
+    console.log(employee)
+    
     if(!employee){
         return next(new ErrorResponse(`Employee with id: ${req.params.id} does not exist`, 404));
     }
-
+    console.log(req.user)
+    
+    if(req.user.id != employee.user_id && req.user.role !== 'admin'){
+        return next(new ErrorResponse(`User with id: ${req.user.id} is not authorized to update employee with id: ${req.params.id}`, 401));
+    } 
     await employee.update(req.body);
     return res.status(200).json({ employee });
 });
@@ -77,9 +82,14 @@ exports.updateEmployee = asyncHandler(async (req, res, next) => {
 
 exports.deleteEmployee = asyncHandler(async (req, res, next) => {
     const employee = await Employee.findByPk(req.params.id);
+
+    
     if(!employee){
         return next(new ErrorResponse(`Employee with id: ${req.params.id} does not exist`, 404));
     }
+    if(req.user.role !== 'admin'){
+        return next(new ErrorResponse(`User with id: ${req.user_id} is not authorized to delete employee with id: ${req.params.id}`, 401));
+    } 
     await employee.destroy();
     return res.status(200).json({ msg: `Employee with ${req.params.id} was deleted` }); 
 });
@@ -90,9 +100,14 @@ exports.deleteEmployee = asyncHandler(async (req, res, next) => {
 
 exports.softDeleteEmployee = asyncHandler(async (req, res, next) => {
     const employee = await Employee.findByPk(req.params.id);
+
+    
     if(!employee){
         return next(new ErrorResponse(`Employee with id: ${req.params.id} does not exist`, 404));
     }
+    if(req.user.role !== 'admin' && req.user.id !== employee.user_id){
+        return next(new ErrorResponse(`User with id: ${req.user_id} is not authorized to delete employee with id: ${req.params.id}`, 401));
+    } 
     await employee.update({ is_active: false });
     res.status(200).json({ success: true, data: {} });
 });

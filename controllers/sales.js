@@ -1,6 +1,7 @@
 const Sale = require('../models/Sale.model');
 const Service = require('../models/Service.model');
 const SalesServices = require('../models/SalesServices.model');
+const Employee = require('../models/Employee.model');
 const ErrorResponse = require('../utils/errorResponse');
 const asyncHandler = require('../middleware/async');
 const { QueryTypes } = require('sequelize');
@@ -227,6 +228,10 @@ exports.deleteSale = asyncHandler(async (req, res, next) => {
 exports.softDeleteSale = asyncHandler(async (req, res, next) => {
     const sale = await Sale.findByPk(req.params.id);
 
+    if(req.user.role !== 'admin'){
+        return next(new ErrorResponse(`User ${req.user.id} is not authorized to soft delete sales`, 401));
+    }
+
     if (!sale) {
         return next(new ErrorResponse(`Sale not found`, 404));
     }
@@ -340,6 +345,13 @@ exports.getSalesByCustomerId = asyncHandler(async (req, res, next) => {
 exports.updateSale = asyncHandler(async (req, res, next) => {
     const { id } = req.params;
     const { customer_id, employee_id, is_active, payment_method, services } = req.body;
+    const employee = await Employee.findByPk(employee_id);
+
+    console.log(employee.id, req.user.id, employee_id)
+
+    if(req.user.role !== 'admin' && req.user.id !== employee.user_id){
+        return next(new ErrorResponse(`User ${req.user.id} is not authorized to update sales`, 401));
+    }
 
     const sale = await Sale.findByPk(id);
     if (!sale) {

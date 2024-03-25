@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const { protect } = require('../middleware/auth');
 
 const {
     createSale,
@@ -13,15 +14,15 @@ const {
     updateSale
 } = require('../controllers/sales')
 
-router.post('/', createSale);
-router.get('/', getSales);
-router.get('/:id', getSaleById);
-router.delete('/:id', deleteSale);
-router.get('/employee/:id', getSalesByEmployeeId);
-router.get('/customer/:id', getSalesByCustomerId);
-router.put('/softDelete/:id', softDeleteSale);
-router.put('/:id', updateSale)
-router.get('/most-sales/:year', getEmployeeWithMostSalesInYear);
+router.post('/', protect, createSale);
+router.get('/', protect, getSales);
+router.get('/:id', protect, getSaleById);
+router.delete('/:id', protect, deleteSale);
+router.get('/employee/:id', protect, getSalesByEmployeeId);
+router.get('/customer/:id', protect, getSalesByCustomerId);
+router.put('/softDelete/:id', protect, softDeleteSale);
+router.put('/:id', protect, updateSale)
+router.get('/most-sales/:year', protect, getEmployeeWithMostSalesInYear);
 
 
 module.exports = router;
