@@ -40,7 +40,8 @@ module.exports = {
           payment_method: randomPaymentMethod,
           createdAt: randomDate,
           updatedAt: randomDate,
-          is_active: true
+          is_active: true,
+          profit: 0
         });
       }
     });
