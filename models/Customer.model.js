@@ -11,7 +11,7 @@ const Customer = sequelize.define('Customer', {
         type: Sequelize.STRING,
         allowNull: false,
     },
-    lastname:{ 
+    lastname: {
         type: Sequelize.STRING,
         allowNull: false,
     },
@@ -35,7 +35,7 @@ const Customer = sequelize.define('Customer', {
     },
     country: {
         type: Sequelize.STRING,
-        allowNull:false
+        allowNull: false
     },
     phone: {
         type: Sequelize.STRING,
@@ -45,6 +45,14 @@ const Customer = sequelize.define('Customer', {
         type: Sequelize.BOOLEAN,
         defaultValue: true,
     },
+    createdAt: {
+        type: Sequelize.DATE,
+        defaultValue: Sequelize.NOW
+    },
+    updatedAt: {
+        type: Sequelize.DATE,
+        defaultValue: Sequelize.NOW
+    }
 });
 
 

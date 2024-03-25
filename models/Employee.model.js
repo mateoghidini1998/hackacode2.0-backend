@@ -1,6 +1,7 @@
 const { Sequelize, DataTypes } = require('sequelize');
 const sequelize = require('../config/db');
 const User = require('./User.model');
+const { de } = require('@faker-js/faker');
 
 const Employee = sequelize.define('Employee', {
     id: {
@@ -50,6 +51,14 @@ const Employee = sequelize.define('Employee', {
         type: Sequelize.BOOLEAN,
         defaultValue: true
     },
+    createdAt: {
+        type: Sequelize.DATE,
+        defaultValue: Sequelize.NOW
+    },
+    updatedAt: {
+        type: Sequelize.DATE,
+        defaultValue: Sequelize.NOW
+    }
 });
 
 module.exports = Employee;
