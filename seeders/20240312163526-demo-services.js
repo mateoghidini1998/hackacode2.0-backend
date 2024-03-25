@@ -91,7 +91,10 @@ module.exports = {
         name: services[i].name,
         description: services[i].description,
         price: faker.commerce.price(),
-        service_date: faker.date.future()
+        service_date: faker.date.future(),
+        is_active: true,
+        createdAt: new Date(),
+        updatedAt: new Date()
       })
     }
 

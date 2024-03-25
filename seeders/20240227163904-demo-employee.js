@@ -29,7 +29,9 @@ module.exports = {
         dni: generateDni(),
         position: faker.person.jobTitle(),
         salary: faker.finance.amount(),
-        user_id: user.id
+        user_id: user.id,
+        createdAt: new Date(),
+        updatedAt: new Date()
       });
     }
     await queryInterface.bulkDelete('Employees', null, {});

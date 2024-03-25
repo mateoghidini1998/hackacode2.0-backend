@@ -21,6 +21,10 @@ module.exports = {
         birthdate: faker.date.past(),
         country: faker.location.country(),
         phone: faker.phone.number(),
+        is_active: true,
+        createdAt: new Date(),
+        updatedAt: new Date()
+        
       });
     }
     await queryInterface.bulkDelete('Customers', null, {});

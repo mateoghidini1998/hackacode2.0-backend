@@ -39,6 +39,8 @@ module.exports = {
           customer_id: randomCustomer.id,
           payment_method: randomPaymentMethod,
           createdAt: randomDate,
+          updatedAt: randomDate,
+          is_active: true
         });
       }
     });
