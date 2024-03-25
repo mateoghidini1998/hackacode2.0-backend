@@ -24,12 +24,12 @@ module.exports = {
     await queryInterface.bulkInsert('SalesServices', dummyJSON, {});
 
     const updateQuery = `
-      UPDATE sales 
+      UPDATE Sales 
       SET profit = COALESCE(
-          (SELECT SUM(services.price) 
-          FROM salesservices 
-          JOIN services ON salesservices.service_id = services.id 
-          WHERE salesservices.sale_id = sales.id), 0
+          (SELECT SUM(Services.price) 
+          FROM SaleSservices 
+          JOIN Services ON SalesServices.service_id = Services.id 
+          WHERE SalesServices.sale_id = Sales.id), 0
       );
     `;
     await queryInterface.sequelize.query(updateQuery, { type: QueryTypes.UPDATE });

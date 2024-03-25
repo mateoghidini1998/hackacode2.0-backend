@@ -12,7 +12,7 @@ module.exports = {
       employee_id: {
           type: Sequelize.INTEGER,
           references: {
-              model: 'employees',
+              model: 'Employees',
               key: 'id'
           },
           required: true,
@@ -21,7 +21,7 @@ module.exports = {
       customer_id: {
           type: Sequelize.INTEGER,
           references: {
-              model: 'customers',
+              model: 'Customers',
               key: 'id'
           },
           required: true,
