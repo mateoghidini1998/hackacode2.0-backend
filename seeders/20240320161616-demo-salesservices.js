@@ -27,7 +27,7 @@ module.exports = {
       UPDATE Sales 
       SET profit = COALESCE(
           (SELECT SUM(Services.price) 
-          FROM SaleSservices 
+          FROM SalesServices 
           JOIN Services ON SalesServices.service_id = Services.id 
           WHERE SalesServices.sale_id = Sales.id), 0
       );
