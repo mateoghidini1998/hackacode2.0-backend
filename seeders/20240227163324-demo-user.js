@@ -12,10 +12,12 @@ module.exports = {
       const firstName = faker.person.firstName();
       const lastName = faker.person.lastName();
       const email = `${firstName.toLowerCase()}.${lastName.toLowerCase()}@gotravel.com`;
+      const role = i < 2 ? 'admin' : 'employee';
       dummyJSON.push({
         id: i + 1,
         email: email,
         password: hash,
+        role: role,
         createdAt : new Date(),
         updatedAt : new Date()
       });
